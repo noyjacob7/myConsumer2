@@ -1,5 +1,6 @@
 package com.example.myConsumer2.Controller;
 
+import com.example.myConsumer2.Calculator.Calculator;
 import com.example.myConsumer2.Consumer.Consumer;
 import org.json.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,68 +16,21 @@ import java.util.Map;
 public class Controller {
 
     private final Consumer c;
+    private Calculator cal;
 
     @Autowired
     Controller(Consumer c) {
         this.c = c;
-    }
-
-    public List<JSONObject> getOnlyJmsgs() {
-        List<JSONObject> jMsgs = new ArrayList<>();
-        JSONObject obj;
-
-        for (String tmp : c.getMsgs()) {
-            try {
-                obj = new JSONObject((tmp));
-            } catch (JSONException ex) {
-                continue;
-            }
-
-            jMsgs.add(obj);
-        }
-
-        return jMsgs;
-    }
-
-    public Map<String, Integer> calcTypes(List<JSONObject> jMsgs) throws JSONException {
-        Map<String, Integer> mapTypes = new HashMap<String, Integer>();
-        String currType;
-        Integer currNum;
-
-        for (JSONObject obj : jMsgs) {
-            currType = obj.getString("typeId");
-
-            if (mapTypes.containsKey(currType)) {
-                currNum = mapTypes.get(currType);
-                mapTypes.put(currType, currNum + 1);
-            }
-            else {
-                mapTypes.put(currType, 1);
-            }
-        }
-
-        return mapTypes;
-    }
-
-    public String getTypesFromMap(Map<String, Integer> mapTypes) {
-        String numOfTypes = "{ ";
-
-        for (Map.Entry<String, Integer> entry : mapTypes.entrySet()) {
-            numOfTypes += "\"" + entry.getKey() + "\": " + entry.getValue() + ", ";
-        }
-        numOfTypes = numOfTypes.substring(0, numOfTypes.length() - 2) + " }";
-
-        return numOfTypes;
+        this.cal = new Calculator();
     }
 
     @GetMapping("/v1/stats")
     public String getMessages() throws JSONException {
 
-        List<JSONObject> jMsgs = getOnlyJmsgs();
-        Map<String, Integer> mapTypes = calcTypes(jMsgs);
-        String numOfTypes = getTypesFromMap(mapTypes);
+        int numOfJsons = cal.getOnlyJmsgsNum(c.getMsgs());
+        String numOfTypes = cal.getTypesFromMap();
 
-        String answer = "{ \"nOfTotalMessagesReceived\": " + jMsgs.size() + ", \"nOfMessagesByType\": " + numOfTypes + " }";
+        String answer = "{ \"nOfTotalMessagesReceived\": " + numOfJsons + ", \"nOfMessagesByType\": " + numOfTypes + " }";
 
         return answer;
     }
