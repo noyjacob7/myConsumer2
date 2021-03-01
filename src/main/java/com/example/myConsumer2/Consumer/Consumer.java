@@ -15,7 +15,7 @@ public class Consumer {
     private final Logger logger = LoggerFactory.getLogger(Consumer.class);
     private final List<String> msgs = new ArrayList<>();
 
-    @KafkaListener(topics = "tdad.sw.interview", groupId = "group_id14")
+    @KafkaListener(topics = "tdad.sw.interview", groupId = "group_id17")
     public void consume(String message) throws IOException {
         msgs.add(message);
         logger.info(String.format("#### -> Consumed message -> %s", message));
